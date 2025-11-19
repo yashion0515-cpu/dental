@@ -15,8 +15,7 @@
 </head>
 <body>
     <h1>金乳歯 取扱歯科医院 登録</h1>
-    <form id="registrationForm">
-        <label for="hospitalName">歯科医院名:</label>
+    <form id="registrationForm" style="display:none;"> <label for="hospitalName">歯科医院名:</label>
         <input type="text" id="hospitalName" required>
 
         <label for="representativeName">代表者名:</label>
@@ -31,7 +30,13 @@
         <button type="submit" id="submitButton">情報を登録する</button>
     </form>
     
-    <div id="successMessage" class="success-message">
+    <div id="loadingMessage">LIFFを初期化しています...</div>
+    <div id="errorMessage" style="color:red; display:none;">
+        <p>🔴 エラー：LIFFの初期化に失敗しました。</p>
+        <p>LINE Developersコンソールに登録されているLIFF IDまたはLIFF URLが間違っています。設定を確認してください。</p>
+    </div>
+
+    <div id="successMessage" class="success-message" style="display:none;">
         登録が完了しました！<br>
         続いてアフィリエイトサイトへの登録をお願いします：<br>
         <a id="affiliateLink" href="https://affitch.com/signup?ref=yashio-gold" target="_blank">アフィリエイトサイトへ移動</a>
@@ -42,24 +47,33 @@
         const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzaRGEl8LardvIO_jKxd5Mirf2-iwWi0ZHRC6ZPelxBfivVZavdj3v73LFJuq28EQ/exec';
         // 【重要】LIFF IDをここに設定します
         const LIFF_ID = '2008433362-nR8Alpk2'; 
+        // 【注意】アフィリエイトサイトのURLを href="..." にも直接記述してください
+        
+        const form = document.getElementById('registrationForm');
+        const loading = document.getElementById('loadingMessage');
+        const errorMsg = document.getElementById('errorMessage');
 
         async function initializeLiff() {
             try {
-                // LIFF IDの初期化のみ行い、ログイン認証は不要
+                // 初期化が成功したらフォームを表示
                 await liff.init({ liffId: LIFF_ID });
                 console.log('LIFF initialization successful');
-
-                // ※liff.login()やliff.getProfile()の呼び出しは不要
+                loading.style.display = 'none';
+                form.style.display = 'block';
 
             } catch (err) {
-                // 初期化失敗時のエラー表示は維持
+                // 初期化失敗時はエラーメッセージを表示
                 console.error('LIFF initialization failed', err);
-                alert('LIFFの初期化に失敗しました。LINEアプリから再度お試しください。');
+                loading.style.display = 'none';
+                errorMsg.style.display = 'block';
+                // ユーザーには具体的な原因を伝えず、設定の問題であることを示唆
             }
         }
 
         document.getElementById('registrationForm').addEventListener('submit', async function(event) {
             event.preventDefault();
+            
+            // ... (データ送信処理は省略せず、前のステップのコードをそのまま使用してください) ...
             
             const submitButton = document.getElementById('submitButton');
             submitButton.disabled = true;
@@ -68,7 +82,6 @@
             try {
                 // フォームデータを取得
                 const formData = {
-                    // userIdの取得と送信は削除
                     hospitalName: document.getElementById('hospitalName').value,
                     representativeName: document.getElementById('representativeName').value,
                     address: document.getElementById('address').value,
@@ -107,5 +120,3 @@
     </script>
 </body>
 </html>
-
-
