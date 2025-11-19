@@ -6,7 +6,7 @@
     <title>歯科医院情報登録フォーム</title>
     <script src="https://static.line-scdn.net/liff/sdk/2.16.1/liff.js"></script>
     <style>
-        /* 簡単なスタイル。必要に応じてCSSを記述してください */
+        /* (スタイルは省略) */
         body { font-family: sans-serif; padding: 20px; }
         input { width: 100%; padding: 10px; margin-bottom: 15px; box-sizing: border-box; }
         button { background-color: #00B900; color: white; padding: 15px 20px; border: none; cursor: pointer; }
@@ -34,28 +34,27 @@
     <div id="successMessage" class="success-message">
         登録が完了しました！<br>
         続いてアフィリエイトサイトへの登録をお願いします：<br>
-        <a id="affiliateLink" href="https://affitch.com/signup?ref=yashio-gold" target="_blank">アフィリエイトサイトへ移動</a>
+        <a id="affiliateLink" href="href="https://affitch.com/signup?ref=yashio-gold" target="_blank">アフィリエイトサイトへ移動</a>
     </div>
 
     <script>
         // 【重要】ここにGASで取得したウェブアプリのURLを記入します
-        const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwZ94LVgq-V1aiiGr6am6r3No9jdLSstDuig7DnIlgtGTgh0NwTt4FtKgC3SA-vD-qR/exec';
+        const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzaRGEl8LardvIO_jKxd5Mirf2-iwWi0ZHRC6ZPelxBfivVZavdj3v73LFJuq28EQ/exec';
         // 【重要】LIFF IDをここに設定します
         const LIFF_ID = '2008433362-nR8Alpk2'; 
 
         async function initializeLiff() {
             try {
+                // LIFF IDの初期化のみ行い、ログイン認証は不要
                 await liff.init({ liffId: LIFF_ID });
                 console.log('LIFF initialization successful');
 
-                if (!liff.isLoggedIn()) {
-                    // LINE IDが取得できない場合はログインを促す
-                    liff.login();
-                }
+                // ※liff.login()やliff.getProfile()の呼び出しは不要
 
             } catch (err) {
+                // 初期化失敗時のエラー表示は維持
                 console.error('LIFF initialization failed', err);
-                alert('LINE連携に失敗しました。LINEアプリから再度お試しください。');
+                alert('LIFFの初期化に失敗しました。LINEアプリから再度お試しください。');
             }
         }
 
@@ -66,21 +65,10 @@
             submitButton.disabled = true;
             submitButton.textContent = '送信中...';
 
-            if (!liff.isLoggedIn()) {
-                alert('LINEログインが必要です。再度お試しください。');
-                submitButton.disabled = false;
-                submitButton.textContent = '情報を登録する';
-                return;
-            }
-
             try {
-                // ユーザーのLINE IDを取得
-                const profile = await liff.getProfile();
-                const userId = profile.userId;
-
                 // フォームデータを取得
                 const formData = {
-                    userId: userId,
+                    // userIdの取得と送信は削除
                     hospitalName: document.getElementById('hospitalName').value,
                     representativeName: document.getElementById('representativeName').value,
                     address: document.getElementById('address').value,
@@ -90,18 +78,17 @@
                 // GASのエンドポイントへデータを送信
                 const response = await fetch(GAS_ENDPOINT, {
                     method: 'POST',
-                    mode: 'cors', // 異なるオリジンへのリクエストを許可
-                    headers: { 'Content-Type': 'text/plain' }, // GASはtext/plainを推奨
+                    mode: 'cors',
+                    headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify(formData)
                 });
                 
-                // GASからのレスポンスをJSONとして解析
                 const result = await response.json();
 
                 if (result.status === 'success') {
                     // 成功時の処理
-                    document.getElementById('registrationForm').style.display = 'none'; // フォームを非表示
-                    document.getElementById('successMessage').style.display = 'block'; // 完了メッセージを表示
+                    document.getElementById('registrationForm').style.display = 'none';
+                    document.getElementById('successMessage').style.display = 'block';
                 } else {
                     alert('データの送信に失敗しました: ' + result.message);
                 }
@@ -119,5 +106,5 @@
         initializeLiff();
     </script>
 </body>
-
 </html>
+
