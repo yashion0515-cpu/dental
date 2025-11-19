@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>歯科医院情報登録フォーム</title>
+    <script src="https://static.line-scdn.net/liff/sdk/2.16.1/liff.js"></script>
+    <style>
+        /* 簡単なスタイル。必要に応じてCSSを記述してください */
+        body { font-family: sans-serif; padding: 20px; }
+        input { width: 100%; padding: 10px; margin-bottom: 15px; box-sizing: border-box; }
+        button { background-color: #00B900; color: white; padding: 15px 20px; border: none; cursor: pointer; }
+        .success-message { color: green; font-weight: bold; margin-top: 20px; display: none; }
+    </style>
+</head>
+<body>
+    <h1>金乳歯 取扱歯科医院 登録</h1>
+    <form id="registrationForm">
+        <label for="hospitalName">歯科医院名:</label>
+        <input type="text" id="hospitalName" required>
+
+        <label for="representativeName">代表者名:</label>
+        <input type="text" id="representativeName" required>
+
+        <label for="address">住所:</label>
+        <input type="text" id="address" required>
+
+        <label for="phoneNumber">電話番号:</label>
+        <input type="tel" id="phoneNumber" required>
+
+        <button type="submit" id="submitButton">情報を登録する</button>
+    </form>
+    
+    <div id="successMessage" class="success-message">
+        登録が完了しました！<br>
+        続いてアフィリエイトサイトへの登録をお願いします：<br>
+        <a id="affiliateLink" href="https://affitch.com/signup?ref=yashio-gold" target="_blank">アフィリエイトサイトへ移動</a>
+    </div>
+
+    <script>
+        // 【重要】ここにGASで取得したウェブアプリのURLを記入します
+        const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwpLPrMbX3Da5jZz_F3reH1gp9oiNn7IPI1MeQ5VN2tpd7_tZKAD6BwR5X_p1OivqPh/exec';
+        // 【重要】LIFF IDをここに設定します
+        const LIFF_ID = '2008433362-nR8Alpk2'; 
+
+        async function initializeLiff() {
+            try {
+                await liff.init({ liffId: LIFF_ID });
+                console.log('LIFF initialization successful');
+
+                if (!liff.isLoggedIn()) {
+                    // LINE IDが取得できない場合はログインを促す
+                    liff.login();
+                }
+
+            } catch (err) {
+                console.error('LIFF initialization failed', err);
+                alert('LINE連携に失敗しました。LINEアプリから再度お試しください。');
+            }
+        }
+
+        document.getElementById('registrationForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            const submitButton = document.getElementById('submitButton');
+            submitButton.disabled = true;
+            submitButton.textContent = '送信中...';
+
+            if (!liff.isLoggedIn()) {
+                alert('LINEログインが必要です。再度お試しください。');
+                submitButton.disabled = false;
+                submitButton.textContent = '情報を登録する';
+                return;
+            }
+
+            try {
+                // ユーザーのLINE IDを取得
+                const profile = await liff.getProfile();
+                const userId = profile.userId;
+
+                // フォームデータを取得
+                const formData = {
+                    userId: userId,
+                    hospitalName: document.getElementById('hospitalName').value,
+                    representativeName: document.getElementById('representativeName').value,
+                    address: document.getElementById('address').value,
+                    phoneNumber: document.getElementById('phoneNumber').value,
+                };
+
+                // GASのエンドポイントへデータを送信
+                const response = await fetch(GAS_ENDPOINT, {
+                    method: 'POST',
+                    mode: 'cors', // 異なるオリジンへのリクエストを許可
+                    headers: { 'Content-Type': 'text/plain' }, // GASはtext/plainを推奨
+                    body: JSON.stringify(formData)
+                });
+                
+                // GASからのレスポンスをJSONとして解析
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    // 成功時の処理
+                    document.getElementById('registrationForm').style.display = 'none'; // フォームを非表示
+                    document.getElementById('successMessage').style.display = 'block'; // 完了メッセージを表示
+                } else {
+                    alert('データの送信に失敗しました: ' + result.message);
+                }
+
+            } catch (error) {
+                console.error('Submission error:', error);
+                alert('エラーが発生しました。時間を置いて再度お試しください。');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = '情報を登録する';
+            }
+        });
+
+        // LIFFの初期化を開始
+        initializeLiff();
+    </script>
+</body>
+</html>
