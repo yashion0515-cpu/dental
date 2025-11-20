@@ -45,18 +45,19 @@
         // 【重要】LIFF IDをここに設定します
         const LIFF_ID = '2008433362-nR8Alpk2'; 
 
+        // 初期化の状態を追跡するフラグ
+        let isLiffInitialized = false; 
+
         async function initializeLiff() {
             try {
                 // LIFF IDの初期化のみ行い、ログイン認証は不要
                 await liff.init({ liffId: LIFF_ID });
                 console.log('LIFF initialization successful');
-
-                // ※liff.login()やliff.getProfile()の呼び出しは不要
-
+                isLiffInitialized = true; // 成功
             } catch (err) {
-                // 初期化失敗時のエラー表示は維持
-                console.error('LIFF initialization failed', err);
-                alert('LIFFの初期化に失敗しました。LINEアプリから再度お試しください。');
+                // 変更点: alertを削除し、コンソールにログを出力するのみとする
+                console.error('LIFF initialization failed. Please check LIFF ID and URL in LINE Developers Console.', err);
+                // フォームの動作自体はLIFF機能を使用しないため、初期化失敗でも処理を進める
             }
         }
 
@@ -66,11 +67,12 @@
             const submitButton = document.getElementById('submitButton');
             submitButton.disabled = true;
             submitButton.textContent = '送信中...';
+            
+            // LIFF初期化の状態に関わらずデータ送信を実行（LINE ID不使用のため）
 
             try {
                 // フォームデータを取得
                 const formData = {
-                    // userIdの取得と送信は削除
                     hospitalName: document.getElementById('hospitalName').value,
                     representativeName: document.getElementById('representativeName').value,
                     address: document.getElementById('address').value,
@@ -109,5 +111,3 @@
     </script>
 </body>
 </html>
-
-
