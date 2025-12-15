@@ -152,23 +152,27 @@
 
 <script>
   const GAS_ENDPOINT =
-    "https://script.google.com/macros/s/AKfycbyNVXpSTLMm-So978ZTmoBn9Gh4FFQKz_BfS5iNb9WlW6OSej54wQH_Gs3sq_5ARS0O/exec";
+    "https://script.google.com/macros/s/AKfycbzzc3txSpGHGUK-KjJWjx58F5tvmO-PztIqMCdEP_Xeu7u5rwCo9RL_Ez5iG86Lpqc8/exec";
 
   const LIFF_ID = "2008433362-NxOdJgkP";
 
   // LIFF初期化
-  async function initLiff() {
-    try {
-      await liff.init({ liffId: LIFF_ID });
+async function initLiff() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
 
-      if (!liff.isInClient()) {
-        alert("LINEアプリ内から開いてください");
-      }
-    } catch (err) {
-      alert("LIFF初期化失敗");
-      console.error(err);
+    // LINE外なら何も言わない（エラー出さない）
+    if (!liff.isInClient()) {
+      console.log("LINE外で開かれています");
+      return;
     }
+
+  } catch (err) {
+    console.error("LIFFエラー", err);
+    // alert を一旦消す
   }
+}
+
 
   window.onload = initLiff;
 
@@ -202,4 +206,5 @@
 
 </body>
 </html>
+
 
