@@ -134,9 +134,9 @@ document.getElementById('postalCode').addEventListener('blur', async function ()
         // 【重要】LIFF IDをここに設定します
         const LIFF_ID = '2008433362-NxOdJgkP'; 
 
-    async function initializeLiff() {
+    // async function initializeLiff() {
       try {
-        await liff.init({ liffId: LIFF_ID });
+       //  await liff.init({ liffId: LIFF_ID });
 
         if (!liff.isInClient()) {
           alert('LINEアプリ内から開いてください');
@@ -152,8 +152,9 @@ document.getElementById('postalCode').addEventListener('blur', async function ()
     }
 
     // ★ これが無いと絶対に動かない
-    initializeLiff();
+     //initializeLiff();
   </script>
     </script>
 </body>
 </html>
+
