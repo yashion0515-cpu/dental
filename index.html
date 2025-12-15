@@ -1,210 +1,44 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 <head>
   <meta charset="UTF-8">
-
-  <!-- スマホ最重要 -->
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-
-  <title>歯科医院情報登録フォーム</title>
-
-  <!-- LIFF SDK（head内に必須） -->
-  <script src="https://static.line-scdn.net/liff/sdk/2.16.1/liff.js"></script>
-
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-      background: #f4f4f4;
-      font-size: 18px; /* ★ 基本文字サイズUP */
-    }
-
-    .container {
-      width: 100%;
-      max-width: 420px;   /* スマホでピッタリ */
-      margin: 0 auto;
-      padding: 20px;
-      background: #fff;
-    }
-
-    h1 {
-      font-size: 22px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    label {
-      font-size: 16px;
-      display: block;
-      margin-bottom: 6px;
-      font-weight: 600;
-    }
-
-    input {
-      width: 100%;
-      font-size: 18px; /* ★ 入力文字を大きく */
-      padding: 14px;
-      margin-bottom: 18px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-
-    button {
-      width: 100%;
-      font-size: 18px;
-      padding: 16px;
-      border-radius: 30px;
-      border: none;
-      background: #00B900;
-      color: #fff;
-      font-weight: bold;
-    }
-
-    .success-message {
-      display: none;
-      padding: 20px;
-    }
-
-    .success-card {
-      background: #fff;
-      padding: 24px;
-      border-radius: 12px;
-      text-align: center;
-    }
-
-    .success-title {
-      font-size: 22px;
-      font-weight: bold;
-      margin-bottom: 12px;
-    }
-
-    .success-text {
-      font-size: 16px;
-      margin-bottom: 20px;
-      line-height: 1.6;
-    }
-
-    .affiliate-button {
-      display: block;
-      padding: 14px;
-      font-size: 18px;
-      background: #000;
-      color: #fff;
-      border-radius: 30px;
-      text-decoration: none;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>テストフォーム</title>
 </head>
-
 <body>
 
-  <!-- フォーム -->
-  <div class="container" id="formContainer">
-    <h1>金乳歯 取扱歯科医院 登録</h1>
+<h2>登録テスト</h2>
 
-    <form id="registrationForm">
-      <label>歯科医院名</label>
-      <input type="text" id="hospitalName" required>
+<input id="hospitalName" placeholder="医院名"><br><br>
+<input id="representativeName" placeholder="代表者名"><br><br>
+<input id="postalCode" placeholder="郵便番号"><br><br>
+<input id="address" placeholder="住所"><br><br>
+<input id="phoneNumber" placeholder="電話番号"><br><br>
+<input id="email" placeholder="メール"><br><br>
 
-      <label>代表者名</label>
-      <input type="text" id="representativeName" required>
-
-      <label>郵便番号</label>
-      <input type="text" id="postalCode" placeholder="1234567" required>
-
-      <label>住所</label>
-      <input type="text" id="address" required>
-
-      <label>電話番号</label>
-      <input type="tel" id="phoneNumber" required>
-
-      <label>メールアドレス</label>
-      <input type="email" id="email" required>
-
-      <button type="submit">登録する</button>
-    </form>
-  </div>
-
-  <!-- 完了画面 -->
-  <div id="successMessage" class="success-message">
-    <div class="container">
-      <div class="success-card">
-        <div class="success-title">登録が完了しました 🎉</div>
-        <div class="success-text">
-          ご登録ありがとうございます。<br>
-          続いて報酬を受け取るために<br>
-          <strong>アフィリエイト登録</strong>をお願いします。
-        </div>
-        <a class="affiliate-button"
-           href="https://affitch.com/signup?ref=yashio-gold"
-           target="_blank">
-           アフィリエイト登録へ進む →
-        </a>
-      </div>
-    </div>
-  </div>
+<button onclick="submitForm()">送信</button>
 
 <script>
-  const GAS_ENDPOINT =
-    "https://script.google.com/macros/s/AKfycbzzc3txSpGHGUK-KjJWjx58F5tvmO-PztIqMCdEP_Xeu7u5rwCo9RL_Ez5iG86Lpqc8/exec";
+const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbwCqtwee1hkZT7F4JeUMyo1xQIUT06X4NHDoKFKnf0PGKvReagqwN7VxEkUf2VflhHO/exec";
 
-  const LIFF_ID = "2008433362-NxOdJgkP";
+async function submitForm() {
+  const data = {
+    hospitalName: hospitalName.value,
+    representativeName: representativeName.value,
+    postalCode: postalCode.value,
+    address: address.value,
+    phoneNumber: phoneNumber.value,
+    email: email.value
+  };
 
-  // LIFF初期化
-async function initLiff() {
-  try {
-    await liff.init({ liffId: LIFF_ID });
-
-    // LINE外なら何も言わない（エラー出さない）
-    if (!liff.isInClient()) {
-      console.log("LINE外で開かれています");
-      return;
-    }
-
-  } catch (err) {
-    console.error("LIFFエラー", err);
-    // alert を一旦消す
-  }
-}
-
-
-  window.onload = initLiff;
-
-  // フォーム送信
-  document.getElementById("registrationForm").addEventListener("submit", async function(e) {
-    e.preventDefault();
-
-    const data = {
-      hospitalName: hospitalName.value,
-      representativeName: representativeName.value,
-      postalCode: postalCode.value,
-      address: address.value,
-      phoneNumber: phoneNumber.value,
-      email: email.value
-    };
-
-    const response = await fetch(GAS_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-
-    if (response.ok) {
-      document.getElementById("formContainer").style.display = "none";
-      document.getElementById("successMessage").style.display = "block";
-    } else {
-      alert("送信に失敗しました");
-    }
+  const res = await fetch(GAS_ENDPOINT, {
+    method: "POST",
+    body: JSON.stringify(data)
   });
+
+  alert("送信しました");
+}
 </script>
 
 </body>
 </html>
-
-
