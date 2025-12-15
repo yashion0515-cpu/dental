@@ -4,6 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>歯科医院情報登録フォーム</title>
+    <style>
+    .success-message {
+        display: none;
+        text-align: center;
+        margin-top: 40px;
+    }
+
+    .success-card {
+        border: 1px solid #d4af37;
+        padding: 30px;
+        border-radius: 12px;
+        background: #fffdf8;
+    }
+
+    .success-title {
+        font-size: 22px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .success-text {
+        font-size: 15px;
+        color: #555;
+        margin-bottom: 25px;
+    }
+
+    .affiliate-button {
+        display: inline-block;
+        background: linear-gradient(135deg, #d4af37, #f5e08a);
+        color: #000;
+        font-weight: bold;
+        padding: 15px 30px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-size: 16px;
+    }
+    </style>
     <script src="https://static.line-scdn.net/liff/sdk/2.16.1/liff.js"></script>
     <style>
         /* (スタイルは省略) */
@@ -16,48 +54,98 @@
 <body>
     <h1>金乳歯 取扱歯科医院 登録</h1>
     <form id="registrationForm">
-        <label for="hospitalName">歯科医院名:</label>
-        <input type="text" id="hospitalName" required>
+       <label for="hospitalName">歯科医院名:</label>
+       <input type="text" id="hospitalName" required>
 
-        <label for="representativeName">代表者名:</label>
-        <input type="text" id="representativeName" required>
+       <label for="representativeName">代表者名:</label>
+       <input type="text" id="representativeName" required>
 
-        <label for="address">住所:</label>
-        <input type="text" id="address" required>
+       <label for="postalCode">郵便番号:</label>
+       <input type="text" id="postalCode" placeholder="例：123-4567" required>
 
-        <label for="phoneNumber">電話番号:</label>
-        <input type="tel" id="phoneNumber" required>
+       <label for="address">住所:</label>
+       <input type="text" id="address" required>
 
-        <button type="submit" id="submitButton">情報を登録する</button>
-    </form>
+       <label for="phoneNumber">電話番号:</label>
+       <input type="tel" id="phoneNumber" required>
+
+       <label for="email">メールアドレス:</label>
+       <input type="email" id="email" required>
+
+       <button type="submit" id="submitButton">情報を登録する</button>
+   </form>
     
-    <div id="successMessage" class="success-message">
-        登録が完了しました！<br>
-        続いて振込口座のご登録をお願いします：<br>
-        <a id="affiliateLink" href="https://affitch.com/signup?ref=yashio-gold" target="_blank">「振込口座等登録ページ」へ移動</a><br>
-        登録完了後販促品をラインからご注文ください。<br>
-    </div>
+　　<div id="successMessage" class="success-message">
+    <div class="success-card">
+        <div class="success-title">登録が完了しました 🎉</div>
 
+        <div class="success-text">
+            ご登録ありがとうございます。<br>
+            続いて、報酬を受け取るために<br>
+            <strong>アフィリエイト登録</strong>をお願いします。
+        </div>
+
+        <a
+            class="affiliate-button"
+            href="https://affitch.com/signup?ref=yashio-gold"
+            target="_blank"
+        >
+            アフィリエイト登録へ進む →
+        </a>
+    </div>
+</div>
 
     <script>
+// 郵便番号 → 住所自動入力
+document.getElementById('postalCode').addEventListener('blur', async function () {
+    const postalCode = this.value.replace('-', '').trim();
+
+    // 7桁チェック
+    if (!/^\d{7}$/.test(postalCode)) {
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `https://zipcloud.ibsnet.co.jp/api/search?zipcode=${postalCode}`
+        );
+
+        const result = await response.json();
+
+        if (result.status === 200 && result.results) {
+            const addressData = result.results[0];
+
+            const fullAddress =
+                addressData.address1 +
+                addressData.address2 +
+                addressData.address3;
+
+            document.getElementById('address').value = fullAddress;
+        }
+
+    } catch (error) {
+        console.error('郵便番号検索エラー', error);
+        // 通信失敗時は何もしない（手入力OK）
+    }
+});
+
         // 【重要】ここにGASで取得したウェブアプリのURLを記入します
-        const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzaRGEl8LardvIO_jKxd5Mirf2-iwWi0ZHRC6ZPelxBfivVZavdj3v73LFJuq28EQ/exec';
+        const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxqRYyiPTElBUCqyd-4aFj4OQ9A-UVDuyeDencdFLc8NX4IdoqcPHORpBVWNhiiCjnl/exec';
         // 【重要】LIFF IDをここに設定します
         const LIFF_ID = '2008433362-nR8Alpk2'; 
-
-        // 初期化の状態を追跡するフラグ
-        let isLiffInitialized = false; 
 
         async function initializeLiff() {
             try {
                 // LIFF IDの初期化のみ行い、ログイン認証は不要
                 await liff.init({ liffId: LIFF_ID });
                 console.log('LIFF initialization successful');
-                isLiffInitialized = true; // 成功
+
+                // ※liff.login()やliff.getProfile()の呼び出しは不要
+
             } catch (err) {
-                // 変更点: alertを削除し、コンソールにログを出力するのみとする
-                console.error('LIFF initialization failed. Please check LIFF ID and URL in LINE Developers Console.', err);
-                // フォームの動作自体はLIFF機能を使用しないため、初期化失敗でも処理を進める
+                // 初期化失敗時のエラー表示は維持
+                console.error('LIFF initialization failed', err);
+                alert('LIFFの初期化に失敗しました。LINEアプリから再度お試しください。');
             }
         }
 
@@ -67,12 +155,11 @@
             const submitButton = document.getElementById('submitButton');
             submitButton.disabled = true;
             submitButton.textContent = '送信中...';
-            
-            // LIFF初期化の状態に関わらずデータ送信を実行（LINE ID不使用のため）
 
             try {
                 // フォームデータを取得
                 const formData = {
+                    // userIdの取得と送信は削除
                     hospitalName: document.getElementById('hospitalName').value,
                     representativeName: document.getElementById('representativeName').value,
                     address: document.getElementById('address').value,
