@@ -134,70 +134,26 @@ document.getElementById('postalCode').addEventListener('blur', async function ()
         // 【重要】LIFF IDをここに設定します
         const LIFF_ID = '2008433362-NxOdJgkP'; 
 
-        async function initializeLiff() {
-            try {
-                // LIFF IDの初期化のみ行い、ログイン認証は不要
-                await liff.init({ liffId: LIFF_ID });
-                console.log('LIFF initialization successful');
+    async function initializeLiff() {
+      try {
+        await liff.init({ liffId: LIFF_ID });
 
-                // ※liff.login()やliff.getProfile()の呼び出しは不要
-
-            } catch (err) {
-                // 初期化失敗時のエラー表示は維持
-                console.error('LIFF initialization failed', err);
-                alert('LIFFの初期化に失敗しました。LINEアプリから再度お試しください。');
-            }
+        if (!liff.isInClient()) {
+          alert('LINEアプリ内から開いてください');
+          return;
         }
 
-        document.getElementById('registrationForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            
-            const submitButton = document.getElementById('submitButton');
-            submitButton.disabled = true;
-            submitButton.textContent = '送信中...';
+        console.log('LIFF OK');
 
-            try {
-                // フォームデータを取得
-                const formData = {
-                    // userIdの取得と送信は削除
-                    hospitalName: document.getElementById('hospitalName').value,
-                    representativeName: document.getElementById('representativeName').value,
-                    address: document.getElementById('address').value,
-                    phoneNumber: document.getElementById('phoneNumber').value,
-                };
+      } catch (err) {
+        console.error(err);
+        alert('LIFFの初期化に失敗しました。LINEアプリから再度お試しください。');
+      }
+    }
 
-                // GASのエンドポイントへデータを送信
-                const response = await fetch(GAS_ENDPOINT, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify(formData)
-                });
-                
-                const result = await response.json();
-
-                if (result.status === 'success') {
-                    // 成功時の処理
-                    document.getElementById('registrationForm').style.display = 'none';
-                    document.getElementById('successMessage').style.display = 'block';
-                } else {
-                    alert('データの送信に失敗しました: ' + result.message);
-                }
-
-            } catch (error) {
-                console.error('Submission error:', error);
-                alert('エラーが発生しました。時間を置いて再度お試しください。');
-            } finally {
-                submitButton.disabled = false;
-                submitButton.textContent = '情報を登録する';
-            }
-        });
-
-        // LIFFの初期化を開始
-        initializeLiff();
+    // ★ これが無いと絶対に動かない
+    initializeLiff();
+  </script>
     </script>
 </body>
 </html>
-
-
-
